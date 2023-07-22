@@ -24,16 +24,24 @@ const App = () => {
     return person.name.toLowerCase().includes(filter.toLowerCase())
   })
 
-  const handleNameChange = (event) => {
+  const handleNameChange = event => {
     setNewName(event.target.value)
   }
 
-  const handleNumberChange = (event) => {
+  const handleNumberChange = event => {
     setNewNumber(event.target.value)
   }
 
-  const handleFilterChange = (event) => {
+  const handleFilterChange = event => {
     setFilter(event.target.value)
+  }
+
+  const handleDelete = id => {
+    const person = people.find(person => person.id === id)
+    if (window.confirm(`Delete ${person.name} ?`)) {
+      peopleService.remove(id)
+      setPeople(people.filter(person => person.id !== id))
+    }
   }
 
   const addPerson = (event) => {
@@ -48,7 +56,8 @@ const App = () => {
       name: newName,
       number: newNumber
     }
-    peopleService.create(personObject)
+    peopleService
+      .create(personObject)
       .then(returnedPerson => {
         setPeople(people.concat(returnedPerson))
         setNewName('')
@@ -72,7 +81,10 @@ const App = () => {
         newNumber={newNumber}
       />
       <h3>Numbers</h3>
-      <People people={filteredPeople}/>
+      <People
+        handleDelete={handleDelete}
+        people={filteredPeople}  
+      />
     </div>
   )
 }
