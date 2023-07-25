@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import Filter from './components/Filter'
 import PersonForm from './components/PersonForm'
 import People from './components/People'
+import Notification from './components/Notification'
 import peopleService from './services/people'
 
 const App = () => {
@@ -9,6 +10,7 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
+  const [notification, setNotification] = useState(null)
 
   useEffect(() => {
       peopleService.getAll()
@@ -41,6 +43,8 @@ const App = () => {
     if (window.confirm(`Delete ${person.name} ?`)) {
       peopleService.remove(id)
       setPeople(people.filter(person => person.id !== id))
+      setNotification(`Deleted ${person.name}`)
+      setTimeout(() => setNotification(null), 3000)
     }
   }
 
@@ -58,10 +62,9 @@ const App = () => {
           .update(foundPerson.id, updatedPerson)
           .then(returnedPerson => {
             setPeople(people.map(person => person.id !== foundPerson.id ? person : returnedPerson))
+            setNotification(`Updated ${returnedPerson.name}`)
+            setTimeout(() => setNotification(null), 3000)
           })
-      } else {
-        setNewName('')
-        setNewNumber('')
       }
     } else {
       const personObject = {
@@ -72,15 +75,18 @@ const App = () => {
         .create(personObject)
         .then(returnedPerson => {
           setPeople(people.concat(returnedPerson))
-          setNewName('')
-          setNewNumber('')
+          setNotification(`Added ${returnedPerson.name}`)
+          setTimeout(() => setNotification(null), 3000)
         })
     }
+    setNewName('')
+    setNewNumber('')
   }
 
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={notification} />
       <Filter 
         handleFilterChange={handleFilterChange} 
         filter={filter}
