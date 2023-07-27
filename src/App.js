@@ -3,6 +3,7 @@ import Filter from './components/Filter'
 import PersonForm from './components/PersonForm'
 import People from './components/People'
 import Notification from './components/Notification'
+import Error from './components/Error'
 import peopleService from './services/people'
 
 const App = () => {
@@ -11,14 +12,18 @@ const App = () => {
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
   const [notification, setNotification] = useState(null)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
       peopleService.getAll()
       .then(initialPeople => {
         setPeople(initialPeople)
       })
-      .catch(err => {
-        console.log(err)
+      .catch(error => {
+        setError(error.message)
+        setTimeout(() => {
+          setError(null)
+        }, 3000)
       })
   }, [])
 
@@ -41,10 +46,22 @@ const App = () => {
   const handleDelete = id => {
     const person = people.find(person => person.id === id)
     if (window.confirm(`Delete ${person.name} ?`)) {
-      peopleService.remove(id)
-      setPeople(people.filter(person => person.id !== id))
-      setNotification(`Deleted ${person.name}`)
-      setTimeout(() => setNotification(null), 3000)
+      peopleService
+        .remove(id)
+        .then(() => {
+          setPeople(people.filter(person => person.id !== id))
+          setNotification(`Deleted ${person.name}`)
+          setTimeout(() => setNotification(null), 3000)
+        })
+        .catch(error => {
+          if (error.response.status === 404) {
+            setError(`Information of ${person.name} has already been removed from server`)
+            setPeople(people.filter(person => person.id !== id))
+            setTimeout(() => {
+              setError(null)
+            }, 3000)
+          }
+        })
     }
   }
 
@@ -65,6 +82,15 @@ const App = () => {
             setNotification(`Updated ${returnedPerson.name}`)
             setTimeout(() => setNotification(null), 3000)
           })
+          .catch(error => {
+            if (error.response.status === 404) {
+              setError(`Information of ${foundPerson.name} has already been removed from server`)
+              setPeople(people.filter(person => person.id !== foundPerson.id))
+              setTimeout(() => {
+                setError(null)
+              }, 3000)
+            }
+          })
       }
     } else {
       const personObject = {
@@ -78,6 +104,12 @@ const App = () => {
           setNotification(`Added ${returnedPerson.name}`)
           setTimeout(() => setNotification(null), 3000)
         })
+        .catch(error => {
+          setError(error.message)
+          setTimeout(() => {
+            setError(null)
+          }, 3000)
+        })
     }
     setNewName('')
     setNewNumber('')
@@ -87,6 +119,7 @@ const App = () => {
     <div>
       <h2>Phonebook</h2>
       <Notification message={notification} />
+      <Error message={error} />
       <Filter 
         handleFilterChange={handleFilterChange} 
         filter={filter}
