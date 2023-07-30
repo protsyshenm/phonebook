@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react'
 import Filter from './components/Filter'
 import PersonForm from './components/PersonForm'
-import People from './components/People'
+import Persons from './components/Persons'
 import Notification from './components/Notification'
 import Error from './components/Error'
-import peopleService from './services/people'
+import personsService from './services/persons'
 
 const App = () => {
-  const [people, setPeople] = useState([]) 
+  const [persons, setPersons] = useState([]) 
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
@@ -15,9 +15,9 @@ const App = () => {
   const [error, setError] = useState(null)
 
   useEffect(() => {
-      peopleService.getAll()
-      .then(initialPeople => {
-        setPeople(initialPeople)
+      personsService.getAll()
+      .then(initialPersons => {
+        setPersons(initialPersons)
       })
       .catch(error => {
         setError(error.message)
@@ -27,7 +27,7 @@ const App = () => {
       })
   }, [])
 
-  const filteredPeople = people.filter(person => {
+  const filteredPersons = persons.filter(person => {
     return person.name.toLowerCase().includes(filter.toLowerCase())
   })
 
@@ -44,19 +44,19 @@ const App = () => {
   }
 
   const handleDelete = id => {
-    const person = people.find(person => person.id === id)
+    const person = persons.find(person => person.id === id)
     if (window.confirm(`Delete ${person.name} ?`)) {
-      peopleService
+      personsService
         .remove(id)
         .then(() => {
-          setPeople(people.filter(person => person.id !== id))
+          setPersons(persons.filter(person => person.id !== id))
           setNotification(`Deleted ${person.name}`)
           setTimeout(() => setNotification(null), 3000)
         })
         .catch(error => {
           if (error.response.status === 404) {
             setError(`Information of ${person.name} has already been removed from server`)
-            setPeople(people.filter(person => person.id !== id))
+            setPersons(persons.filter(person => person.id !== id))
             setTimeout(() => {
               setError(null)
             }, 3000)
@@ -67,25 +67,25 @@ const App = () => {
 
   const addPerson = (event) => {
     event.preventDefault()
-    const peopleNames = people.map(person => person.name)
-    if (peopleNames.includes(newName)) {
+    const personsNames = persons.map(person => person.name)
+    if (personsNames.includes(newName)) {
       if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
-        const foundPerson = people.find(person => person.name === newName)
+        const foundPerson = persons.find(person => person.name === newName)
         const updatedPerson = {
           ...foundPerson,
           number: newNumber
         }
-        peopleService
+        personsService
           .update(foundPerson.id, updatedPerson)
           .then(returnedPerson => {
-            setPeople(people.map(person => person.id !== foundPerson.id ? person : returnedPerson))
+            setPersons(persons.map(person => person.id !== foundPerson.id ? person : returnedPerson))
             setNotification(`Updated ${returnedPerson.name}`)
             setTimeout(() => setNotification(null), 3000)
           })
           .catch(error => {
             if (error.response.status === 404) {
               setError(`Information of ${foundPerson.name} has already been removed from server`)
-              setPeople(people.filter(person => person.id !== foundPerson.id))
+              setPersons(persons.filter(person => person.id !== foundPerson.id))
               setTimeout(() => {
                 setError(null)
               }, 3000)
@@ -97,10 +97,10 @@ const App = () => {
         name: newName,
         number: newNumber
       }
-      peopleService
+      personsService
         .create(personObject)
         .then(returnedPerson => {
-          setPeople(people.concat(returnedPerson))
+          setPersons(persons.concat(returnedPerson))
           setNotification(`Added ${returnedPerson.name}`)
           setTimeout(() => setNotification(null), 3000)
         })
@@ -133,9 +133,9 @@ const App = () => {
         newNumber={newNumber}
       />
       <h3>Numbers</h3>
-      <People
+      <Persons
         handleDelete={handleDelete}
-        people={filteredPeople}  
+        persons={filteredPersons}  
       />
     </div>
   )
