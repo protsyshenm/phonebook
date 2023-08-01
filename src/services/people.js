@@ -1,5 +1,5 @@
 import axios from 'axios'
-const baseUrl = '/api/persons'
+const baseUrl = '/api/people'
 
 const getAll = () => {
   const request = axios.get(baseUrl)
@@ -21,6 +21,6 @@ const remove = id => {
   return request.then(response => response.data)
 }
 
-const personsService = { getAll, create, update, remove }
+const peopleService = { getAll, create, update, remove }
 
-export default personsService
+export default peopleService
