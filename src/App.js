@@ -24,7 +24,7 @@ const App = () => {
           setError(error.message)
           setTimeout(() => {
             setError(null)
-          }, 3000)
+          }, 5000)
         })
   }, [])
 
@@ -52,7 +52,7 @@ const App = () => {
         .then(() => {
           setPeople(people.filter(person => person.id !== id))
           setNotification(`Deleted ${person.name}`)
-          setTimeout(() => setNotification(null), 3000)
+          setTimeout(() => setNotification(null), 5000)
         })
         .catch(error => {
           if (error.response.status === 404) {
@@ -60,7 +60,7 @@ const App = () => {
             setPeople(people.filter(person => person.id !== id))
             setTimeout(() => {
               setError(null)
-            }, 3000)
+            }, 5000)
           }
         })
     }
@@ -81,7 +81,7 @@ const App = () => {
           .then(returnedPerson => {
             setPeople(people.map(person => person.id !== foundPerson.id ? person : returnedPerson))
             setNotification(`Updated ${returnedPerson.name}`)
-            setTimeout(() => setNotification(null), 3000)
+            setTimeout(() => setNotification(null), 5000)
           })
           .catch(error => {
             if (error.response.status === 404) {
@@ -89,7 +89,12 @@ const App = () => {
               setPeople(people.filter(person => person.id !== foundPerson.id))
               setTimeout(() => {
                 setError(null)
-              }, 3000)
+              }, 5000)
+            } else {
+              setError(error.response.data.error)
+              setTimeout(() => {
+                setError(null)
+              }, 5000)
             }
           })
       }
@@ -103,13 +108,13 @@ const App = () => {
         .then(returnedPerson => {
           setPeople(people.concat(returnedPerson))
           setNotification(`Added ${returnedPerson.name}`)
-          setTimeout(() => setNotification(null), 3000)
+          setTimeout(() => setNotification(null), 5000)
         })
         .catch(error => {
-          setError(error.message)
+          setError(error.response.data.error)
           setTimeout(() => {
             setError(null)
-          }, 3000)
+          }, 5000)
         })
     }
     setNewName('')
